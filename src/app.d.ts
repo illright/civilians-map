@@ -1,11 +1,9 @@
 /// <reference types="@sveltejs/kit" />
+import type { MarkerClusterGroup, MarkerClusterGroupOptions } from 'leaflet';
 
-// See https://kit.svelte.dev/docs/types#app
-// for information about these interfaces
-// and what to do when importing types
-declare namespace App {
-	// interface Locals {}
-	// interface Platform {}
-	// interface Session {}
-	// interface Stuff {}
+declare module 'leaflet.markercluster' {
+	const MarkerClusterGroup: {
+		new (options?: MarkerClusterGroupOptions): MarkerClusterGroup;
+	};
+	export { MarkerClusterGroup };
 }
