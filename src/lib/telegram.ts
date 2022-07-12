@@ -1,21 +1,11 @@
-import { parse, walk } from 'svelte/compiler';
+import { parse } from 'parse5';
 
 export async function getPictureByUsername(username: string): Promise<string | undefined> {
   const tmePageResponse = await fetch(`https://telegram.me/${username.replace(/^@/, '')}`);
   const tmePage = await tmePageResponse.text();
 
-  let profilePictureUrl: string | undefined = undefined;
-  walk(parse(tmePage), {
-    enter(node) {
-      if (profilePictureUrl !== undefined) {
-        this.skip();
-      }
-
-      if (node.type === 'Element' && node.name === 'meta' && node.attributes.find((attr: any) => attr.name === 'property' && attr.value[0].data === 'og:image')) {
-        profilePictureUrl = node.attributes.find((attr: any) => attr.name === 'content')?.value[0].data;
-      }
-    }
-  });
-
-  return profilePictureUrl;
+  const document = parse(tmePage);
+  const head = (document.childNodes[1] as any).childNodes.find((node: any) => node.nodeName === 'head');
+  const metaOgImage = head.childNodes.find((node: any) => node.nodeName === 'meta' && node.attrs && node.attrs.find((attr: any) => attr.name === 'property' && attr.value === 'og:image'));
+  return metaOgImage.attrs.find((attr: any) => attr.name === 'content')?.value;
 }
