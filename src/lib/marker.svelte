@@ -18,7 +18,7 @@
 				icon: leaflet.icon({
 					iconUrl,
 					iconSize: [40, 40],
-					className: 'rounded-full'
+					className: 'marker-image'
 				})
 			});
 
