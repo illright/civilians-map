@@ -137,7 +137,9 @@ export interface Person {
 		cachedLocation: string | null;
 		cachedTelegram: string | null;
 		coordinates: [number, number];
+		coordinatesCachedOn: string;
 		pictureUrl: string | null;
+		pictureCachedOn: string;
 	};
 }
 
@@ -164,7 +166,7 @@ export async function getPeople(
 				url: page.url,
 				location: location.length === 0 ? null : location,
 				telegram: (await properties.getEmail(telegramField)) ?? null,
-				cached: JSON.parse((await properties.getText(cacheField)) ?? '{}'),
+				cached: JSON.parse((await properties.getText(cacheField)) || '{}')
 			});
 		}
 	}
@@ -178,6 +180,7 @@ export async function cachePersonData(
 	coordinates: [number, number],
 	pictureUrl: string | null | undefined
 ) {
+	const now = new Date().toISOString();
 	await notion.pages.update({
 		page_id: person.id,
 		properties: {
@@ -190,7 +193,9 @@ export async function cachePersonData(
 								cachedLocation: person.location,
 								cachedTelegram: person.telegram,
 								coordinates,
-								pictureUrl: pictureUrl ?? null
+								coordinatesCachedOn: now,
+								pictureUrl: pictureUrl ?? null,
+								pictureCachedOn: now
 							})
 						}
 					}

@@ -1,5 +1,5 @@
 import { lookUpPlace } from '$lib/nominatim';
-import { cachePersonData, getPeople } from '$lib/notion';
+import { cachePersonData, getPeople, type Person } from '$lib/notion';
 import { getPictureByUsername } from '$lib/telegram';
 import type { RequestEvent } from '@sveltejs/kit';
 
@@ -9,15 +9,15 @@ export async function get({ url }: RequestEvent) {
 		return {
 			status: 401,
 			body: {
-				markers: [],
+				markers: []
 			}
-		}
+		};
 	}
 	const people = await getPeople(
 		url.searchParams.get('db')!,
 		url.searchParams.getAll('loc_field'),
 		url.searchParams.get('tg_field')!,
-		url.searchParams.get('cache_field')!,
+		url.searchParams.get('cache_field')!
 	);
 
 	const markers = [];
@@ -25,13 +25,13 @@ export async function get({ url }: RequestEvent) {
 		const { location, telegram, cached } = person;
 		if (location !== null) {
 			const [coordinates, pictureUrl] = await Promise.all([
-				cached.cachedLocation === location ? cached.coordinates : lookUpPlace(location),
-				cached.cachedTelegram === telegram
+				cachedLocationValid(cached, location) ? cached.coordinates : lookUpPlace(location),
+				cachedTelegramValid(cached, telegram)
 					? cached.pictureUrl
 					: telegram && getPictureByUsername(telegram)
 			]);
 
-			if (cached.coordinates !== coordinates || cached.pictureUrl !== pictureUrl) {
+			if (!cachedLocationValid(cached, location) || !cachedTelegramValid(cached, telegram)) {
 				await cachePersonData(
 					person,
 					url.searchParams.get('cache_field')!,
@@ -53,4 +53,18 @@ export async function get({ url }: RequestEvent) {
 			markers
 		}
 	};
+}
+
+const cacheExpiration = 1000 * 60 * 60 * 24;
+
+function cachedLocationValid(cached: Person['cached'], location: string | null) {
+	const now = new Date();
+	const cachedOn = new Date(cached.coordinatesCachedOn);
+	return cached.cachedLocation === location && now.valueOf() - cachedOn.valueOf() < cacheExpiration;
+}
+
+function cachedTelegramValid(cached: Person['cached'], telegram: string | null) {
+	const now = new Date();
+	const cachedOn = new Date(cached.pictureCachedOn);
+	return cached.cachedTelegram === telegram && now.valueOf() - cachedOn.valueOf() < cacheExpiration;
 }
