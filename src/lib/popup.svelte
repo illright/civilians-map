@@ -1,26 +1,24 @@
 <script lang="ts">
 	import IconTelegram from '~icons/logos/telegram';
 	export let name: string;
+	export let url: string;
 	export let telegram: string;
 	export let location: string | null;
-	export let hobbies: string;
-	export let workInterests: string;
 
 	$: telegramUsername = telegram.replace(/^@/, '');
 </script>
 
 <h1>
-	<span>{name}</span>
+	<span>{@html name}</span>
 	<a href="https://t.me/{telegramUsername}"
 		><IconTelegram width="20" height="20" />
 		<span class="sr-only">Telegram: {telegramUsername}</span>
 	</a>
 </h1>
-<div class="location">{location}</div>
-<h2>Увлечения</h2>
-<p>{hobbies}</p>
-<h2>Рабочие интересы</h2>
-<p>{workInterests}</p>
+{#if location !== null}
+	<div class="location">{@html location}</div>
+{/if}
+<a class="notion" href={url}>Карточка в Notion</a>
 
 <style>
 	h1 {
@@ -35,17 +33,18 @@
 		display: block;
 	}
 
-	h2 {
-		font-size: 1.1em;
-		margin: 0.75em 0 0.25em;
-	}
-
-	p {
-		margin: 0 0 0.5em;
-	}
-
 	.location {
 		color: gray;
+	}
+
+	.notion {
+		display: block;
+		text-align: center;
+		padding: 0.5em 0;
+		border: 1px solid gray;
+		color: gray;
+    border-radius: 0.25em;
+    margin-top: 1em;
 	}
 
 	/* Credit: https://stackoverflow.com/a/42665456/5726823 */

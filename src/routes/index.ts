@@ -40,7 +40,7 @@ export async function get({ url }: RequestEvent) {
 				);
 			}
 
-			markers.push([coordinates, pictureUrl]);
+			markers.push([coordinates, pictureUrl, person]);
 		}
 	}
 
