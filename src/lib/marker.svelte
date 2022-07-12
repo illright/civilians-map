@@ -2,6 +2,8 @@
 	import { getContext, onMount } from 'svelte';
 	import { mapCtx, type MapContext } from './map.svelte';
 
+	import './marker.css';
+
 	export let position: [number, number];
 	export let iconUrl: string;
 	const context = getContext<MapContext>(mapCtx);
@@ -13,8 +15,9 @@
 				leaflet.marker(position, {
 					icon: leaflet.icon({
 						iconUrl,
-						iconSize: [48, 48]
-					})
+						iconSize: [40, 40],
+						className: 'rounded-full'
+					}),
 				})
 			);
 		});
